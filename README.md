@@ -1,5 +1,3 @@
-Você tem razão! Peço desculpas pela formatação inadequada. Vamos criar um README no formato correto, seguindo as convenções comuns para projetos de software e hardware.
-
 # Sistema Alerta de Nível
 
 ## Descrição

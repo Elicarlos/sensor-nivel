@@ -16,19 +16,22 @@
 #define BUZZER_FREQUENCIA_GRAVE 100
 
 void pwm_init_buzzer(uint pin, uint frequencia) {
-    // Configura o pino de saída do PWM
+    // Configura o pino de saída como PWM
     gpio_set_function(pin, GPIO_FUNC_PWM);
 
-    // Obtém o slice de PWM associado ao pino
+    // Obtém o slice de PWM associado ao pino (controle do pwm)
     uint slice_num = pwm_gpio_to_slice_num(pin);
 
     // Configura o PWM com a frequência desejada
     pwm_config config = pwm_get_default_config();
+
+    //Configura o divisor de clock para definir a frequencia do PWM
     pwm_config_set_clkdiv(&config, (float)clock_get_hz(clk_sys) / (frequencia * 4096)); // Divisor de clock
 
+    // Inicia o pwm 
     pwm_init(slice_num, &config, true);
 
-    // Inicia o PWM no nível baixo
+    // Inicia o PWM no nível baixo, define o nivel inicial do pino
     pwm_set_gpio_level(pin, 0);
 }
 
@@ -36,17 +39,21 @@ void beep(uint pin, uint duration_ms, uint frequencia) {
     // Obtém o slice do PWM associado ao pino
     uint slice_num = pwm_gpio_to_slice_num(pin);
 
+    //Ativa o buzzer com valor PWM, simulando um som
     pwm_set_gpio_level(pin, 2048);
 
-    // Temporização
+    // Pausa a execução por um tempo determinado pela variavel para gerar um som
     sleep_ms(duration_ms);
 
+    // Desliga o Buzzer
     pwm_set_gpio_level(pin, 0);
 
-    // Pausa entre os bips
+    // Aguarda um pequeno intervalo entre os bips
     sleep_ms(100);
 }
 
+
+// Função para evitar leituras instaveis dos sensores
 int debounce_sensor(uint pin){
     int estado = gpio_get(pin);
     sleep_ms(50);
@@ -69,7 +76,10 @@ void alerta_caixa_cheia(uint pin){
 }
 
 int main() {
+
+    //Inicia a biblioteca de entras e saidas, para permitir o uso de printf
     stdio_init_all();
+
 
     // Inicia o PWM no pino do BUZZER
     pwm_init_buzzer(BUZZER_PIN, 500);
@@ -99,10 +109,6 @@ int main() {
     gpio_put(LEDG, false);
 
     while (true) {
-        // int estado_0 = gpio_get(SENSOR_0);
-        // int estado_50 = gpio_get(SENSOR_50);
-        // int estado_100 = gpio_get(SENSOR_100);
-
         int estado_0 = debounce_sensor(SENSOR_0);
         int estado_50 = debounce_sensor(SENSOR_50);
         int estado_100 = debounce_sensor(SENSOR_100);
